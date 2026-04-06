@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <meta name="theme-color" content="#0f0f0f"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+  <meta name="apple-mobile-web-app-title" content="Cassa"/>
+  <title>Cassa — Il mio negozio</title>
+  <link rel="manifest" href="manifest.json"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+
+  <style>
+    :root {
+      --bg:       #0d0d0d;
+      --surface:  #161616;
+      --card:     #1e1e1e;
+      --border:   #2a2a2a;
+      --accent:   #c8f135;
+      --accent2:  #f1c335;
+      --red:      #ff4d4d;
+      --text:     #f0f0f0;
+      --muted:    #888;
+      --radius:   16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ── PIN SCREEN ── */
+    #pin-screen {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 40px; z-index: 999;
+      padding: 32px;
+    }
+
+    .pin-logo {
+      font-size: 13px; font-weight: 700; letter-spacing: 0.25em;
+      color: var(--muted); text-transform: uppercase;
+    }
+
+    .pin-title {
+      font-size: 28px; font-weight: 800;
+      text-align: center; line-height: 1.2;
+    }
+
+    .pin-title span { color: var(--accent); }
+
+    .pin-dots {
+      display: flex; gap: 16px;
+    }
+
+    .pin-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .pin-dot.filled {
+      background: var(--accent);
+      border-color: var(--accent);
+      transform: scale(1.15);
+    }
+
+    .pin-dot.error {
+      background: var(--red);
+      border-color: var(--red);
+      animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+      0%,100%{transform:translateX(0)}
+      20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)}
+      60%{transform:translateX(-5px)}
+      80%{transform:translateX(5px)}
+    }
+
+    .pin-pad {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 12px; width: 100%; max-width: 280px;
+    }
+
+    .pin-btn {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      color: var(--text);
+      font-family: 'DM Mono', monospace;
+      font-size: 22px; font-weight: 500;
+      padding: 20px 0;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .pin-btn:active { background: var(--border); transform: scale(0.95); }
+
+    .pin-btn.del {
+      font-size: 16px; color: var(--muted);
+      font-family: 'Syne', sans-serif; font-weight: 600;
+    }
+
+    .pin-error {
+      font-size: 13px; color: var(--red); font-weight: 600;
+      letter-spacing: 0.05em; min-height: 18px;
+    }
+
+    /* ── APP ── */
+    #app { display: none; flex-direction: column; min-height: 100dvh; }
+    #app.visible { display: flex; }
+
+    /* HEADER */
+    .app-header {
+      padding: 20px 20px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0;
+      background: var(--bg); z-index: 10;
+    }
+
+    .app-logo {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+      color: var(--muted); text-transform: uppercase;
+    }
+
+    .app-name {
+      font-size: 18px; font-weight: 800; color: var(--text);
+    }
+
+    .lock-btn {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 10px; padding: 8px 12px;
+      color: var(--muted); font-size: 18px;
+      cursor: pointer; -webkit-tap-highlight-color: transparent;
+    }
+
+    /* NAV TABS */
+    .nav-tabs {
+      display: flex; border-bottom: 1px solid var(--border);
+      background: var(--bg); position: sticky; top: 61px; z-index: 9;
+    }
+
+    .nav-tab {
+      flex: 1; padding: 14px 8px; text-align: center;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.08em;
+      text-transform: uppercase; color: var(--muted);
+      cursor: pointer; border-bottom: 2px solid transparent;
+      transition: color 0.2s, border-color 0.2s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* CONTENT */
+    .tab-content { display: none; padding: 20px; flex: 1; }
+    .tab-content.active { display: block; }
+
+    /* FORM */
+    .date-row {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+      margin-bottom: 20px;
+    }
+
+    .date-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); white-space: nowrap;
+    }
+
+    .date-input {
+      flex: 1; background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'DM Mono', monospace;
+      font-size: 16px; font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--muted);
+      margin-bottom: 12px; margin-top: 4px;
+    }
+
+    .input-group {
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .input-row {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 0 16px;
+      display: flex; align-items: center; gap: 12px;
+    }
+
+    .input-row:focus-within { border-color: var(--accent); }
+
+    .input-icon { font-size: 20px; }
+
+    .input-wrap { flex: 1; display: flex; flex-direction: column; padding: 12px 0; }
+
+    .input-name {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
+    }
+
+    .input-field {
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'DM Mono', monospace;
+      font-size: 20px; font-weight: 500; width: 100%;
+    }
+
+    .input-field::placeholder { color: var(--border); }
+
+    .input-suffix {
+      font-family: 'DM Mono', monospace;
+      font-size: 16px; color: var(--muted);
+    }
+
+    /* TOTALE PREVIEW */
+    .total-preview {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .total-label {
+      font-size: 12px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted);
+    }
+
+    .total-value {
+      font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500;
+      color: var(--accent);
+    }
+
+    /* DB INFO */
+    .db-info {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 10px; margin-bottom: 20px;
+    }
+
+    .db-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+    }
+
+    .db-card-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
+    }
+
+    .db-card-value {
+      font-family: 'DM Mono', monospace; font-size: 20px;
+      font-weight: 500; color: var(--accent2);
+    }
+
+    /* NOTES */
+    .notes-field {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px 16px;
+      color: var(--text); font-family: 'Syne', sans-serif;
+      font-size: 15px; width: 100%; min-height: 90px;
+      resize: none; outline: none; margin-bottom: 24px;
+    }
+
+    .notes-field:focus { border-color: var(--accent); }
+    .notes-field::placeholder { color: var(--border); }
+
+    /* BTN */
+    .btn-save {
+      width: 100%; padding: 18px;
+      background: var(--accent); border: none; border-radius: var(--radius);
+      color: #0d0d0d; font-family: 'Syne', sans-serif;
+      font-size: 15px; font-weight: 800; letter-spacing: 0.05em;
+      cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-save:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
+      background: var(--accent); color: #0d0d0d;
+      font-weight: 700; font-size: 14px; letter-spacing: 0.05em;
+      padding: 14px 28px; border-radius: 100px;
+      transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
+      z-index: 999; white-space: nowrap;
+    }
+
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    .toast.error { background: var(--red); color: #fff; }
+
+    /* STORICO */
+    .history-list { display: flex; flex-direction: column; gap: 12px; }
+
+    .history-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      cursor: pointer; transition: border-color 0.2s;
+    }
+
+    .history-card:active { border-color: var(--accent); }
+
+    .history-top {
+      display: flex; justify-content: space-between; align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .history-date {
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      letter-spacing: 0.05em;
+    }
+
+    .history-total {
+      font-family: 'DM Mono', monospace; font-size: 22px;
+      font-weight: 500; color: var(--accent);
+    }
+
+    .history-chips {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
+    }
+
+    .chip {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+      padding: 4px 10px; border-radius: 100px;
+      background: var(--surface); color: var(--muted);
+    }
+
+    .history-note {
+      font-size: 13px; color: var(--muted);
+      font-style: italic; margin-top: 6px;
+      padding-top: 8px; border-top: 1px solid var(--border);
+    }
+
+    .diff-pos { color: #7bc67e; }
+    .diff-neg { color: var(--red); }
+
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      color: var(--muted); font-size: 14px;
+    }
+
+    .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+
+    /* SPINNER */
+    .spinner {
+      width: 24px; height: 24px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite; margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-row {
+      display: flex; justify-content: center; padding: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════ PIN SCREEN ═══════════════════════════ -->
+<div id="pin-screen">
+  <p class="pin-logo">Cassa App</p>
+  <div>
+    <h1 class="pin-title">Inserisci il tuo<br/><span>PIN</span></h1>
+  </div>
+  <div class="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <p class="pin-error" id="pin-error"></p>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinPress('1')">1</button>
+    <button class="pin-btn" onclick="pinPress('2')">2</button>
+    <button class="pin-btn" onclick="pinPress('3')">3</button>
+    <button class="pin-btn" onclick="pinPress('4')">4</button>
+    <button class="pin-btn" onclick="pinPress('5')">5</button>
+    <button class="pin-btn" onclick="pinPress('6')">6</button>
+    <button class="pin-btn" onclick="pinPress('7')">7</button>
+    <button class="pin-btn" onclick="pinPress('8')">8</button>
+    <button class="pin-btn" onclick="pinPress('9')">9</button>
+    <button class="pin-btn" style="visibility:hidden"></button>
+    <button class="pin-btn" onclick="pinPress('0')">0</button>
+    <button class="pin-btn del" onclick="pinDel()">⌫</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<div id="app">
+
+  <header class="app-header">
+    <div>
+      <p class="app-logo">Il mio negozio</p>
+      <p class="app-name">Cassa</p>
+    </div>
+    <button class="lock-btn" onclick="lockApp()" title="Blocca">🔒</button>
+  </header>
+
+  <nav class="nav-tabs">
+    <div class="nav-tab active" onclick="switchTab('inserisci')">Inserisci</div>
+    <div class="nav-tab" onclick="switchTab('storico')">Storico</div>
+  </nav>
+
+  <!-- ─── TAB: INSERISCI ─── -->
+  <div class="tab-content active" id="tab-inserisci">
+
+    <!-- DATA -->
+    <div class="date-row">
+      <span class="date-label">📅 Data</span>
+      <input type="date" class="date-input" id="entry-date" onchange="onDateChange()"/>
+    </div>
+
+    <!-- DB INFO -->
+    <div class="db-info">
+      <div class="db-card">
+        <p class="db-card-label">🎯 Forecast</p>
+        <p class="db-card-value" id="lbl-forecast">—</p>
+      </div>
+      <div class="db-card">
+        <p class="db-card-label">📅 Anno prec.</p>
+        <p class="db-card-value" id="lbl-lastyear">—</p>
+      </div>
+    </div>
+
+    <!-- INCASSI -->
+    <p class="section-label">Incassi</p>
+    <div class="input-group">
+      <div class="input-row">
+        <span class="input-icon">💵</span>
+        <div class="input-wrap">
+          <span class="input-name">Contanti</span>
+          <input type="number" inputmode="decimal" class="input-field" id="inp-cash" placeholder="0.00" oninput="updateTotal()"/>
+        </div>
+        <span class="input-suffix">€</span>
+      </div>
+      <div class="input-row">
+        <span class="input-icon">💳</span>
+        <div class="input-wrap">
+          <span class="input-name">Carte</span>
+          <input type="number" inputmode="decimal" class="input-field" id="inp-card" placeholder="0.00" oninput="updateTotal()"/>
+        </div>
+        <span class="input-suffix">€</span>
+      </div>
+      <div class="input-row">
+        <span class="input-icon">🛵</span>
+        <div class="input-wrap">
+          <span class="input-name">JustEat</span>
+          <input type="number" inputmode="decimal" class="input-field" id="inp-justeat" placeholder="0.00" oninput="updateTotal()"/>
+        </div>
+        <span class="input-suffix">€</span>
+      </div>
+    </div>
+
+    <!-- TOTALE -->
+    <div class="total-preview">
+      <span class="total-label">Totale giornata</span>
+      <span class="total-value" id="lbl-total">€ 0,00</span>
+    </div>
+
+    <!-- NOTE -->
+    <p class="section-label">Note</p>
+    <textarea class="notes-field" id="inp-notes"
+      placeholder="Es: chiuso x dottore, neve, aperto 2 ore in più..."></textarea>
+
+    <button class="btn-save" id="btn-save" onclick="saveEntry()">SALVA INCASSO</button>
+
+  </div><!-- /tab-inserisci -->
+
+  <!-- ─── TAB: STORICO ─── -->
+  <div class="tab-content" id="tab-storico">
+    <div class="loading-row" id="history-loading"><div class="spinner"></div></div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════
+//  ⚙️  CONFIGURAZIONE — modifica queste variabili
+// ═══════════════════════════════════════════════
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjfjTr7X3jnKGBsPI_A0BFZ0wpl3dme2ySr7hYq-747umfXEx-dSdaOGJxoCwbKUXMOg/exec'; // ← sostituisci!
+const PIN        = '5918'; // ← cambia con il tuo PIN segreto
+
+// ═══════════════════════════════════════════════
+
+// ── PIN LOGIC ──
+let pinBuffer = '';
+
+function pinPress(digit) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updatePinDots();
+  if (pinBuffer.length === 4) checkPin();
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+}
+
+function updatePinDots() {
+  for (let i = 0; i < 4; i++) {
+    const dot = document.getElementById('d' + i);
+    dot.className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
+  }
+}
+
+function checkPin() {
+  if (pinBuffer === PIN) {
+    document.getElementById('pin-screen').style.display = 'none';
+    document.getElementById('app').classList.add('visible');
+    initApp();
+  } else {
+    for (let i = 0; i < 4; i++) {
+      document.getElementById('d' + i).className = 'pin-dot error';
+    }
+    document.getElementById('pin-error').textContent = 'PIN errato. Riprova.';
+    setTimeout(() => {
+      pinBuffer = '';
+      updatePinDots();
+    }, 700);
+  }
+}
+
+function lockApp() {
+  pinBuffer = '';
+  updatePinDots();
+  document.getElementById('pin-error').textContent = '';
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('app').classList.remove('visible');
+}
+
+// ── APP INIT ──
+let dbForecast = 0, dbLastYear = 0;
+
+function initApp() {
+  setTodayDate();
+  onDateChange();
+}
+
+function setTodayDate() {
+  const today = new Date();
+  const yyyy  = today.getFullYear();
+  const mm    = String(today.getMonth() + 1).padStart(2, '0');
+  const dd    = String(today.getDate()).padStart(2, '0');
+  document.getElementById('entry-date').value = `${yyyy}-${mm}-${dd}`;
+}
+
+function getFormattedDate() {
+  const val = document.getElementById('entry-date').value;
+  if (!val) return null;
+  const [y, m, d] = val.split('-');
+  return `${d}/${m}/${y}`;
+}
+
+async function onDateChange() {
+  const date = getFormattedDate();
+  if (!date) return;
+
+  document.getElementById('lbl-forecast').textContent = '...';
+  document.getElementById('lbl-lastyear').textContent = '...';
+
+  // Carica DB
+  const dbData = await apiGet({ action: 'getDBForDate', date });
+  if (dbData && dbData.status === 'found') {
+    dbForecast = Number(dbData.forecast) || 0;
+    dbLastYear = Number(dbData.lastyear) || 0;
+    document.getElementById('lbl-forecast').textContent = '€ ' + fmt(dbForecast);
+    document.getElementById('lbl-lastyear').textContent = '€ ' + fmt(dbLastYear);
+  } else {
+    dbForecast = 0; dbLastYear = 0;
+    document.getElementById('lbl-forecast').textContent = '—';
+    document.getElementById('lbl-lastyear').textContent = '—';
+  }
+
+  // Controlla se esiste già
+  const check = await apiGet({ action: 'checkDate', date });
+  if (check && check.exists) {
+    document.getElementById('inp-cash').value    = check.cash    || '';
+    document.getElementById('inp-card').value    = check.card    || '';
+    document.getElementById('inp-justeat').value = check.justeat || '';
+    document.getElementById('inp-notes').value   = check.notes   || '';
+    document.getElementById('btn-save').textContent = 'AGGIORNA INCASSO';
+    updateTotal();
+    showToast('Giornata già inserita — puoi modificarla', false);
+  } else {
+    document.getElementById('inp-cash').value    = '';
+    document.getElementById('inp-card').value    = '';
+    document.getElementById('inp-justeat').value = '';
+    document.getElementById('inp-notes').value   = '';
+    document.getElementById('btn-save').textContent = 'SALVA INCASSO';
+    updateTotal();
+  }
+}
+
+function updateTotal() {
+  const cash    = parseFloat(document.getElementById('inp-cash').value)    || 0;
+  const card    = parseFloat(document.getElementById('inp-card').value)    || 0;
+  const justeat = parseFloat(document.getElementById('inp-justeat').value) || 0;
+  const total   = cash + card + justeat;
+  document.getElementById('lbl-total').textContent = '€ ' + fmt(total);
+}
+
+async function saveEntry() {
+  const date    = getFormattedDate();
+  const cash    = parseFloat(document.getElementById('inp-cash').value)    || 0;
+  const card    = parseFloat(document.getElementById('inp-card').value)    || 0;
+  const justeat = parseFloat(document.getElementById('inp-justeat').value) || 0;
+  const notes   = document.getElementById('inp-notes').value.trim();
+
+  if (!date) { showToast('Seleziona una data', true); return; }
+  if (cash === 0 && card === 0 && justeat === 0) {
+    showToast('Inserisci almeno un incasso', true); return;
+  }
+
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true;
+  const isUpdate = btn.textContent.includes('AGGIORNA');
+
+  const params = {
+    action:   isUpdate ? 'updateRevenue' : 'addRevenue',
+    date, cash, card, justeat, notes,
+    forecast: dbForecast,
+    lastyear: dbLastYear
+  };
+
+  const res = await apiPost(params);
+  btn.disabled = false;
+
+  if (res && (res.status === 'success' || res.status === 'updated')) {
+    showToast(isUpdate ? 'Aggiornato! ✓' : 'Salvato! ✓');
+    btn.textContent = 'AGGIORNA INCASSO';
+  } else {
+    showToast('Errore nel salvataggio', true);
+  }
+}
+
+// ── TAB SWITCHING ──
+function switchTab(tab) {
+  document.querySelectorAll('.nav-tab').forEach((t, i) => {
+    const tabs = ['inserisci', 'storico'];
+    t.classList.toggle('active', tabs[i] === tab);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  if (tab === 'storico') loadHistory();
+}
+
+// ── STORICO ──
+async function loadHistory() {
+  const list    = document.getElementById('history-list');
+  const loading = document.getElementById('history-loading');
+  list.innerHTML = '';
+  loading.style.display = 'flex';
+
+  const data = await apiGet({ action: 'getRevenues' });
+  loading.style.display = 'none';
+
+  if (!data || !data.items || data.items.length === 0) {
+    list.innerHTML = '<div class="empty-state"><span class="emoji">📭</span>Nessun incasso ancora registrato.</div>';
+    return;
+  }
+
+  const sorted = [...data.items].reverse();
+  sorted.forEach(item => {
+    const diffPct  = item.diffPct   !== '' ? Number(item.diffPct)   : null;
+    const diffLYPct= item.diffLYPct !== '' ? Number(item.diffLYPct) : null;
+
+    const diffClass  = diffPct  === null ? '' : (diffPct  >= 0 ? 'diff-pos' : 'diff-neg');
+    const diffLYClass= diffLYPct=== null ? '' : (diffLYPct>= 0 ? 'diff-pos' : 'diff-neg');
+
+    const diffStr  = diffPct  === null ? '' : `<span class="chip ${diffClass}">${diffPct >= 0 ? '+' : ''}${diffPct}% vs Target</span>`;
+    const diffLYStr= diffLYPct=== null ? '' : `<span class="chip ${diffLYClass}">${diffLYPct >= 0 ? '+' : ''}${diffLYPct}% vs LY</span>`;
+
+    const noteStr  = item.notes ? `<p class="history-note">📝 ${escHtml(item.notes)}</p>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'history-card';
+    card.innerHTML = `
+      <div class="history-top">
+        <span class="history-date">${item.date}</span>
+        <span class="history-total">€ ${fmt(item.total)}</span>
+      </div>
+      <div class="history-chips">
+        <span class="chip">💵 ${fmt(item.cash)}</span>
+        <span class="chip">💳 ${fmt(item.card)}</span>
+        <span class="chip">🛵 ${fmt(item.justeat)}</span>
+        ${diffStr}${diffLYStr}
+      </div>
+      ${noteStr}
+    `;
+    list.appendChild(card);
+  });
+}
+
+// ── API HELPERS ──
+async function apiGet(params) {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) {
+    console.warn('URL Apps Script non configurato!'); return null;
+  }
+  const qs  = new URLSearchParams(params).toString();
+  const url = `${SCRIPT_URL}?${qs}`;
+  try {
+    const res = await fetch(url);
+    return await res.json();
+  } catch (err) {
+    console.error('GET error', err); return null;
+  }
+}
+
+async function apiPost(params) {
+  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) {
+    console.warn('URL Apps Script non configurato!'); return null;
+  }
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams(params).toString()
+    });
+    return await res.json();
+  } catch (err) {
+    console.error('POST error', err); return null;
+  }
+}
+
+// ── UTILS ──
+function fmt(n) {
+  return Number(n || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+let toastTimer;
+function showToast(msg, isError = false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className   = 'toast' + (isError ? ' error' : '') + ' show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2800);
+}
+</script>
+</body>
+</html>
