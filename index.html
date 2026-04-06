@@ -29,12 +29,27 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    html {
+      overscroll-behavior: none;
+      height: 100%;
+    }
+
     body {
       background: var(--bg);
       color: var(--text);
       font-family: 'Syne', sans-serif;
-      min-height: 100dvh;
-      overflow-x: hidden;
+      height: 100%;
+      overflow: hidden;
+      position: fixed;
+      width: 100%;
+    }
+
+    #app-scroll {
+      position: absolute;
+      inset: 0;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
 
     /* ── PIN SCREEN ── */
@@ -59,35 +74,24 @@
 
     .pin-title span { color: var(--accent); }
 
-    .pin-dots {
-      display: flex; gap: 16px;
-    }
+    .pin-dots { display: flex; gap: 16px; }
 
     .pin-dot {
       width: 18px; height: 18px; border-radius: 50%;
       border: 2px solid var(--border);
-      background: transparent;
-      transition: all 0.2s;
+      background: transparent; transition: all 0.2s;
     }
 
-    .pin-dot.filled {
-      background: var(--accent);
-      border-color: var(--accent);
-      transform: scale(1.15);
-    }
+    .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.15); }
 
     .pin-dot.error {
-      background: var(--red);
-      border-color: var(--red);
+      background: var(--red); border-color: var(--red);
       animation: shake 0.4s ease;
     }
 
     @keyframes shake {
-      0%,100%{transform:translateX(0)}
-      20%{transform:translateX(-8px)}
-      40%{transform:translateX(8px)}
-      60%{transform:translateX(-5px)}
-      80%{transform:translateX(5px)}
+      0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
+      40%{transform:translateX(8px)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)}
     }
 
     .pin-pad {
@@ -96,60 +100,39 @@
     }
 
     .pin-btn {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 22px; font-weight: 500;
-      padding: 20px 0;
-      cursor: pointer;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500;
+      padding: 20px 0; cursor: pointer;
       transition: background 0.15s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: transparent; user-select: none;
     }
 
     .pin-btn:active { background: var(--border); transform: scale(0.95); }
+    .pin-btn.del { font-size: 16px; color: var(--muted); font-family: 'Syne', sans-serif; font-weight: 600; }
 
-    .pin-btn.del {
-      font-size: 16px; color: var(--muted);
-      font-family: 'Syne', sans-serif; font-weight: 600;
-    }
-
-    .pin-error {
-      font-size: 13px; color: var(--red); font-weight: 600;
-      letter-spacing: 0.05em; min-height: 18px;
-    }
+    .pin-error { font-size: 13px; color: var(--red); font-weight: 600; letter-spacing: 0.05em; min-height: 18px; }
 
     /* ── APP ── */
-    #app { display: none; flex-direction: column; min-height: 100dvh; }
+    #app { display: none; flex-direction: column; min-height: 100%; }
     #app.visible { display: flex; }
 
-    /* HEADER */
     .app-header {
       padding: 20px 20px 12px;
       display: flex; align-items: center; justify-content: space-between;
       border-bottom: 1px solid var(--border);
-      position: sticky; top: 0;
-      background: var(--bg); z-index: 10;
+      position: sticky; top: 0; background: var(--bg); z-index: 10;
     }
 
-    .app-logo {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-      color: var(--muted); text-transform: uppercase;
-    }
-
-    .app-name {
-      font-size: 18px; font-weight: 800; color: var(--text);
-    }
+    .app-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+    .app-name { font-size: 18px; font-weight: 800; color: var(--text); }
 
     .lock-btn {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: 10px; padding: 8px 12px;
-      color: var(--muted); font-size: 18px;
+      border-radius: 10px; padding: 8px 12px; color: var(--muted); font-size: 18px;
       cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
 
-    /* NAV TABS */
     .nav-tabs {
       display: flex; border-bottom: 1px solid var(--border);
       background: var(--bg); position: sticky; top: 61px; z-index: 9;
@@ -161,12 +144,11 @@
       text-transform: uppercase; color: var(--muted);
       cursor: pointer; border-bottom: 2px solid transparent;
       transition: color 0.2s, border-color 0.2s;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: transparent; user-select: none;
     }
 
     .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    /* CONTENT */
     .tab-content { display: none; padding: 20px; flex: 1; }
     .tab-content.active { display: block; }
 
@@ -174,31 +156,19 @@
     .date-row {
       display: flex; align-items: center; gap: 10px;
       background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 16px;
-      margin-bottom: 20px;
+      border-radius: var(--radius); padding: 14px 16px; margin-bottom: 20px;
     }
 
-    .date-label {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted); white-space: nowrap;
-    }
+    .date-label { font-size: 11px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 
     .date-input {
       flex: 1; background: transparent; border: none; outline: none;
-      color: var(--text); font-family: 'DM Mono', monospace;
-      font-size: 16px; font-weight: 500;
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 16px; font-weight: 500;
     }
 
-    .section-label {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
-      text-transform: uppercase; color: var(--muted);
-      margin-bottom: 12px; margin-top: 4px;
-    }
+    .section-label { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 12px; margin-top: 4px; }
 
-    .input-group {
-      display: flex; flex-direction: column; gap: 10px;
-      margin-bottom: 20px;
-    }
+    .input-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
 
     .input-row {
       background: var(--card); border: 1px solid var(--border);
@@ -207,15 +177,9 @@
     }
 
     .input-row:focus-within { border-color: var(--accent); }
-
     .input-icon { font-size: 20px; }
-
     .input-wrap { flex: 1; display: flex; flex-direction: column; padding: 12px 0; }
-
-    .input-name {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 2px;
-    }
+    .input-name { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
 
     .input-field {
       background: transparent; border: none; outline: none;
@@ -224,52 +188,23 @@
     }
 
     .input-field::placeholder { color: var(--border); }
+    .input-suffix { font-family: 'DM Mono', monospace; font-size: 16px; color: var(--muted); }
 
-    .input-suffix {
-      font-family: 'DM Mono', monospace;
-      font-size: 16px; color: var(--muted);
-    }
-
-    /* TOTALE PREVIEW */
     .total-preview {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 16px 20px;
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;
     }
 
-    .total-label {
-      font-size: 12px; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted);
-    }
+    .total-label { font-size: 12px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+    .total-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; color: var(--accent); }
 
-    .total-value {
-      font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500;
-      color: var(--accent);
-    }
+    .db-info { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
 
-    /* DB INFO */
-    .db-info {
-      display: grid; grid-template-columns: 1fr 1fr;
-      gap: 10px; margin-bottom: 20px;
-    }
+    .db-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .db-card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .db-card-value { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; color: var(--accent2); }
 
-    .db-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 14px 16px;
-    }
-
-    .db-card-label {
-      font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--muted); margin-bottom: 4px;
-    }
-
-    .db-card-value {
-      font-family: 'DM Mono', monospace; font-size: 20px;
-      font-weight: 500; color: var(--accent2);
-    }
-
-    /* NOTES */
     .notes-field {
       background: var(--card); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 14px 16px;
@@ -281,106 +216,97 @@
     .notes-field:focus { border-color: var(--accent); }
     .notes-field::placeholder { color: var(--border); }
 
-    /* BTN */
     .btn-save {
       width: 100%; padding: 18px;
       background: var(--accent); border: none; border-radius: var(--radius);
       color: #0d0d0d; font-family: 'Syne', sans-serif;
       font-size: 15px; font-weight: 800; letter-spacing: 0.05em;
       cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
+      -webkit-tap-highlight-color: transparent; margin-bottom: 32px;
     }
 
     .btn-save:active { transform: scale(0.98); opacity: 0.9; }
     .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
 
-    /* TOAST */
+    /* STORICO */
+    .filter-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+
+    .filter-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 14px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+
+    .filter-label { font-size: 10px; font-weight: 700; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); }
+
+    .filter-input {
+      background: transparent; border: none; outline: none;
+      color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; width: 100%;
+    }
+
+    .btn-filter {
+      width: 100%; padding: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
+      letter-spacing: 0.05em; cursor: pointer; margin-bottom: 20px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .btn-filter:active { opacity: 0.7; }
+
+    .history-list { display: flex; flex-direction: column; gap: 12px; padding-bottom: 32px; }
+
+    .history-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+
+    .history-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+    .history-date { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; }
+    .history-total { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; color: var(--accent); }
+
+    .history-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+
+    .chip { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; padding: 4px 10px; border-radius: 100px; background: var(--surface); color: var(--muted); }
+
+    .history-note { font-size: 13px; color: var(--muted); font-style: italic; margin-top: 6px; padding-top: 8px; border-top: 1px solid var(--border); }
+
+    .diff-pos { color: #7bc67e; }
+    .diff-neg { color: var(--red); }
+
+    .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+    .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
+
+    .loading-row { display: flex; justify-content: center; padding: 40px; }
+
+    .spinner {
+      width: 24px; height: 24px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .db-loading { font-family: 'DM Mono', monospace; font-size: 16px; color: var(--muted); animation: pulse 1s ease infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
     .toast {
       position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
       background: var(--accent); color: #0d0d0d;
       font-weight: 700; font-size: 14px; letter-spacing: 0.05em;
       padding: 14px 28px; border-radius: 100px;
       transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-      z-index: 999; white-space: nowrap;
+      z-index: 9999; white-space: nowrap;
     }
 
     .toast.show { transform: translateX(-50%) translateY(0); }
     .toast.error { background: var(--red); color: #fff; }
-
-    /* STORICO */
-    .history-list { display: flex; flex-direction: column; gap: 12px; }
-
-    .history-card {
-      background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 16px;
-      cursor: pointer; transition: border-color 0.2s;
-    }
-
-    .history-card:active { border-color: var(--accent); }
-
-    .history-top {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      margin-bottom: 10px;
-    }
-
-    .history-date {
-      font-size: 13px; font-weight: 700; color: var(--muted);
-      letter-spacing: 0.05em;
-    }
-
-    .history-total {
-      font-family: 'DM Mono', monospace; font-size: 22px;
-      font-weight: 500; color: var(--accent);
-    }
-
-    .history-chips {
-      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;
-    }
-
-    .chip {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
-      padding: 4px 10px; border-radius: 100px;
-      background: var(--surface); color: var(--muted);
-    }
-
-    .history-note {
-      font-size: 13px; color: var(--muted);
-      font-style: italic; margin-top: 6px;
-      padding-top: 8px; border-top: 1px solid var(--border);
-    }
-
-    .diff-pos { color: #7bc67e; }
-    .diff-neg { color: var(--red); }
-
-    .empty-state {
-      text-align: center; padding: 60px 20px;
-      color: var(--muted); font-size: 14px;
-    }
-
-    .empty-state .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
-
-    /* SPINNER */
-    .spinner {
-      width: 24px; height: 24px; border: 3px solid var(--border);
-      border-top-color: var(--accent); border-radius: 50%;
-      animation: spin 0.7s linear infinite; margin: 0 auto;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .loading-row {
-      display: flex; justify-content: center; padding: 40px;
-    }
   </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════ PIN SCREEN ═══════════════════════════ -->
+<!-- PIN -->
 <div id="pin-screen">
   <p class="pin-logo">Cassa App</p>
-  <div>
-    <h1 class="pin-title">Inserisci il tuo<br/><span>PIN</span></h1>
-  </div>
+  <h1 class="pin-title">Inserisci il tuo<br/><span>PIN</span></h1>
   <div class="pin-dots">
     <div class="pin-dot" id="d0"></div>
     <div class="pin-dot" id="d1"></div>
@@ -404,7 +330,8 @@
   </div>
 </div>
 
-<!-- ═══════════════════════════ APP ═══════════════════════════ -->
+<!-- APP -->
+<div id="app-scroll">
 <div id="app">
 
   <header class="app-header">
@@ -412,7 +339,7 @@
       <p class="app-logo">Il mio negozio</p>
       <p class="app-name">Cassa</p>
     </div>
-    <button class="lock-btn" onclick="lockApp()" title="Blocca">🔒</button>
+    <button class="lock-btn" onclick="lockApp()">🔒</button>
   </header>
 
   <nav class="nav-tabs">
@@ -420,16 +347,14 @@
     <div class="nav-tab" onclick="switchTab('storico')">Storico</div>
   </nav>
 
-  <!-- ─── TAB: INSERISCI ─── -->
+  <!-- TAB INSERISCI -->
   <div class="tab-content active" id="tab-inserisci">
 
-    <!-- DATA -->
     <div class="date-row">
       <span class="date-label">📅 Data</span>
       <input type="date" class="date-input" id="entry-date" onchange="onDateChange()"/>
     </div>
 
-    <!-- DB INFO -->
     <div class="db-info">
       <div class="db-card">
         <p class="db-card-label">🎯 Forecast</p>
@@ -441,7 +366,6 @@
       </div>
     </div>
 
-    <!-- INCASSI -->
     <p class="section-label">Incassi</p>
     <div class="input-group">
       <div class="input-row">
@@ -470,44 +394,65 @@
       </div>
     </div>
 
-    <!-- TOTALE -->
     <div class="total-preview">
       <span class="total-label">Totale giornata</span>
       <span class="total-value" id="lbl-total">€ 0,00</span>
     </div>
 
-    <!-- NOTE -->
     <p class="section-label">Note</p>
-    <textarea class="notes-field" id="inp-notes"
-      placeholder="Es: chiuso x dottore, neve, aperto 2 ore in più..."></textarea>
+    <textarea class="notes-field" id="inp-notes" placeholder="Es: chiuso x dottore, neve, aperto 2 ore in più..."></textarea>
 
     <button class="btn-save" id="btn-save" onclick="saveEntry()">SALVA INCASSO</button>
 
-  </div><!-- /tab-inserisci -->
+  </div>
 
-  <!-- ─── TAB: STORICO ─── -->
+  <!-- TAB STORICO -->
   <div class="tab-content" id="tab-storico">
-    <div class="loading-row" id="history-loading"><div class="spinner"></div></div>
+
+    <div class="filter-row">
+      <div class="filter-card">
+        <span class="filter-label">📅 Dal</span>
+        <input type="date" class="filter-input" id="filter-from"/>
+      </div>
+      <div class="filter-card">
+        <span class="filter-label">📅 Al</span>
+        <input type="date" class="filter-input" id="filter-to"/>
+      </div>
+    </div>
+    <button class="btn-filter" onclick="loadHistory()">🔍 CERCA</button>
+
+    <div class="loading-row" id="history-loading" style="display:none">
+      <div class="spinner"></div>
+    </div>
     <div class="history-list" id="history-list"></div>
+
   </div>
 
 </div><!-- /app -->
+</div><!-- /app-scroll -->
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
 <script>
-// ═══════════════════════════════════════════════
-//  ⚙️  CONFIGURAZIONE — modifica queste variabili
-// ═══════════════════════════════════════════════
+// ── CONFIGURAZIONE ──
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjfjTr7X3jnKGBsPI_A0BFZ0wpl3dme2ySr7hYq-747umfXEx-dSdaOGJxoCwbKUXMOg/exec';
+const PIN        = '5918';
 
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwjfjTr7X3jnKGBsPI_A0BFZ0wpl3dme2ySr7hYq-747umfXEx-dSdaOGJxoCwbKUXMOg/exec'; // ← sostituisci!
-const PIN        = '5918'; // ← cambia con il tuo PIN segreto
+// ── BLOCCA PULL-TO-REFRESH ──
+document.getElementById('app-scroll').addEventListener('touchmove', function(e) {
+  if (this.scrollTop === 0) e.preventDefault();
+}, { passive: false });
 
-// ═══════════════════════════════════════════════
+// ── PIN ──
+let pinBuffer   = '';
+let appUnlocked = false;
 
-// ── PIN LOGIC ──
-let pinBuffer = '';
+// Se l'app torna in foreground e il PIN era già inserito, non richiedere il PIN
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && appUnlocked) {
+    document.getElementById('pin-screen').style.display = 'none';
+  }
+});
 
 function pinPress(digit) {
   if (pinBuffer.length >= 4) return;
@@ -524,29 +469,26 @@ function pinDel() {
 
 function updatePinDots() {
   for (let i = 0; i < 4; i++) {
-    const dot = document.getElementById('d' + i);
-    dot.className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
+    const d = document.getElementById('d' + i);
+    d.className = 'pin-dot' + (i < pinBuffer.length ? ' filled' : '');
   }
 }
 
 function checkPin() {
   if (pinBuffer === PIN) {
+    appUnlocked = true;
     document.getElementById('pin-screen').style.display = 'none';
     document.getElementById('app').classList.add('visible');
     initApp();
   } else {
-    for (let i = 0; i < 4; i++) {
-      document.getElementById('d' + i).className = 'pin-dot error';
-    }
+    for (let i = 0; i < 4; i++) document.getElementById('d' + i).className = 'pin-dot error';
     document.getElementById('pin-error').textContent = 'PIN errato. Riprova.';
-    setTimeout(() => {
-      pinBuffer = '';
-      updatePinDots();
-    }, 700);
+    setTimeout(() => { pinBuffer = ''; updatePinDots(); }, 700);
   }
 }
 
 function lockApp() {
+  appUnlocked = false;
   pinBuffer = '';
   updatePinDots();
   document.getElementById('pin-error').textContent = '';
@@ -554,119 +496,129 @@ function lockApp() {
   document.getElementById('app').classList.remove('visible');
 }
 
-// ── APP INIT ──
+// ── INIT ──
 let dbForecast = 0, dbLastYear = 0;
+let dbCache = {};
 
 function initApp() {
   setTodayDate();
+  setDefaultHistoryDates();
   onDateChange();
 }
 
 function setTodayDate() {
-  const today = new Date();
-  const yyyy  = today.getFullYear();
-  const mm    = String(today.getMonth() + 1).padStart(2, '0');
-  const dd    = String(today.getDate()).padStart(2, '0');
-  document.getElementById('entry-date').value = `${yyyy}-${mm}-${dd}`;
+  document.getElementById('entry-date').value = toInputDate(new Date());
 }
 
-function getFormattedDate() {
-  const val = document.getElementById('entry-date').value;
+function setDefaultHistoryDates() {
+  const today = new Date();
+  const from  = new Date(today.getFullYear(), today.getMonth(), 1);
+  document.getElementById('filter-to').value   = toInputDate(today);
+  document.getElementById('filter-from').value = toInputDate(from);
+}
+
+function toInputDate(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function getFormattedDate(id) {
+  const val = document.getElementById(id || 'entry-date').value;
   if (!val) return null;
-  const [y, m, d] = val.split('-');
+  const [y,m,d] = val.split('-');
   return `${d}/${m}/${y}`;
 }
 
+// ── CAMBIO DATA ──
 async function onDateChange() {
-  const date = getFormattedDate();
+  const date = getFormattedDate('entry-date');
   if (!date) return;
 
-  document.getElementById('lbl-forecast').textContent = '...';
-  document.getElementById('lbl-lastyear').textContent = '...';
+  document.getElementById('lbl-forecast').innerHTML = '<span class="db-loading">...</span>';
+  document.getElementById('lbl-lastyear').innerHTML = '<span class="db-loading">...</span>';
+  document.getElementById('btn-save').disabled = true;
 
-  // Carica DB
-  const dbData = await apiGet({ action: 'getDBForDate', date });
-  if (dbData && dbData.status === 'found') {
+  // Carica tutto in parallelo
+  const [dbData, check] = await Promise.all([
+    dbCache[date] ? Promise.resolve(dbCache[date]) : apiGet({ action: 'getDBForDate', date }),
+    apiGet({ action: 'checkDate', date })
+  ]);
+
+  // DB
+  if (dbData && (dbData.status === 'found' || dbData.forecast !== undefined)) {
     dbForecast = Number(dbData.forecast) || 0;
     dbLastYear = Number(dbData.lastyear) || 0;
-    document.getElementById('lbl-forecast').textContent = '€ ' + fmt(dbForecast);
-    document.getElementById('lbl-lastyear').textContent = '€ ' + fmt(dbLastYear);
+    if (!dbCache[date]) dbCache[date] = { status:'found', forecast: dbForecast, lastyear: dbLastYear };
   } else {
     dbForecast = 0; dbLastYear = 0;
-    document.getElementById('lbl-forecast').textContent = '—';
-    document.getElementById('lbl-lastyear').textContent = '—';
   }
 
-  // Controlla se esiste già
-  const check = await apiGet({ action: 'checkDate', date });
+  document.getElementById('lbl-forecast').textContent = dbForecast ? '€ ' + fmt(dbForecast) : '—';
+  document.getElementById('lbl-lastyear').textContent = dbLastYear ? '€ ' + fmt(dbLastYear) : '—';
+
+  // Esistenza
   if (check && check.exists) {
     document.getElementById('inp-cash').value    = check.cash    || '';
     document.getElementById('inp-card').value    = check.card    || '';
     document.getElementById('inp-justeat').value = check.justeat || '';
     document.getElementById('inp-notes').value   = check.notes   || '';
-    document.getElementById('btn-save').textContent = 'AGGIORNA INCASSO';
-    updateTotal();
-    showToast('Giornata già inserita — puoi modificarla', false);
+    document.getElementById('btn-save').disabled = true;
+    document.getElementById('btn-save').style.opacity = '0.45';
+    document.getElementById('btn-save').textContent = 'GIÀ REGISTRATA ✓';
+    showToast('Giornata già registrata ✓');
   } else {
     document.getElementById('inp-cash').value    = '';
     document.getElementById('inp-card').value    = '';
     document.getElementById('inp-justeat').value = '';
     document.getElementById('inp-notes').value   = '';
+    document.getElementById('btn-save').disabled = false;
+    document.getElementById('btn-save').style.opacity = '1';
     document.getElementById('btn-save').textContent = 'SALVA INCASSO';
-    updateTotal();
   }
+  updateTotal();
 }
 
 function updateTotal() {
-  const cash    = parseFloat(document.getElementById('inp-cash').value)    || 0;
-  const card    = parseFloat(document.getElementById('inp-card').value)    || 0;
-  const justeat = parseFloat(document.getElementById('inp-justeat').value) || 0;
-  const total   = cash + card + justeat;
-  document.getElementById('lbl-total').textContent = '€ ' + fmt(total);
+  const c = parseFloat(document.getElementById('inp-cash').value)    || 0;
+  const k = parseFloat(document.getElementById('inp-card').value)    || 0;
+  const j = parseFloat(document.getElementById('inp-justeat').value) || 0;
+  document.getElementById('lbl-total').textContent = '€ ' + fmt(c + k + j);
 }
 
+// ── SALVA ──
 async function saveEntry() {
-  const date    = getFormattedDate();
+  const date    = getFormattedDate('entry-date');
   const cash    = parseFloat(document.getElementById('inp-cash').value)    || 0;
   const card    = parseFloat(document.getElementById('inp-card').value)    || 0;
   const justeat = parseFloat(document.getElementById('inp-justeat').value) || 0;
   const notes   = document.getElementById('inp-notes').value.trim();
 
   if (!date) { showToast('Seleziona una data', true); return; }
-  if (cash === 0 && card === 0 && justeat === 0) {
-    showToast('Inserisci almeno un incasso', true); return;
-  }
+  if (cash === 0 && card === 0 && justeat === 0) { showToast('Inserisci almeno un incasso', true); return; }
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true;
-  const isUpdate = btn.textContent.includes('AGGIORNA');
+  btn.textContent = 'Salvataggio...';
 
-  const params = {
-    action:   isUpdate ? 'updateRevenue' : 'addRevenue',
-    date, cash, card, justeat, notes,
-    forecast: dbForecast,
-    lastyear: dbLastYear
-  };
+  const res = await apiPost({ action: 'addRevenue', date, cash, card, justeat, notes, forecast: dbForecast, lastyear: dbLastYear });
 
-  const res = await apiPost(params);
-  btn.disabled = false;
-
-  if (res && (res.status === 'success' || res.status === 'updated')) {
-    showToast(isUpdate ? 'Aggiornato! ✓' : 'Salvato! ✓');
-    btn.textContent = 'AGGIORNA INCASSO';
+  if (res && res.status === 'success') {
+    showToast('Salvato! ✓');
+    btn.textContent = 'GIÀ REGISTRATA ✓';
+    btn.style.opacity = '0.45';
   } else {
     showToast('Errore nel salvataggio', true);
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    btn.textContent = 'SALVA INCASSO';
   }
 }
 
-// ── TAB SWITCHING ──
+// ── TAB ──
 function switchTab(tab) {
-  document.querySelectorAll('.nav-tab').forEach((t, i) => {
-    const tabs = ['inserisci', 'storico'];
-    t.classList.toggle('active', tabs[i] === tab);
-  });
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', ['inserisci','storico'][i] === tab));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('app-scroll').scrollTop = 0;
   if (tab === 'storico') loadHistory();
 }
 
@@ -685,18 +637,33 @@ async function loadHistory() {
     return;
   }
 
-  const sorted = [...data.items].reverse();
-  sorted.forEach(item => {
-    const diffPct  = item.diffPct   !== '' ? Number(item.diffPct)   : null;
-    const diffLYPct= item.diffLYPct !== '' ? Number(item.diffLYPct) : null;
+  const fromVal = document.getElementById('filter-from').value;
+  const toVal   = document.getElementById('filter-to').value;
+  const fromD   = fromVal ? new Date(fromVal) : null;
+  const toD     = toVal   ? new Date(toVal)   : null;
+  if (toD) toD.setHours(23,59,59);
 
-    const diffClass  = diffPct  === null ? '' : (diffPct  >= 0 ? 'diff-pos' : 'diff-neg');
-    const diffLYClass= diffLYPct=== null ? '' : (diffLYPct>= 0 ? 'diff-pos' : 'diff-neg');
+  let items = [...data.items].reverse().filter(item => {
+    if (!fromD && !toD) return true;
+    const [dd,mm,yyyy] = item.date.split('/');
+    const d = new Date(`${yyyy}-${mm}-${dd}`);
+    if (fromD && d < fromD) return false;
+    if (toD   && d > toD)   return false;
+    return true;
+  });
 
-    const diffStr  = diffPct  === null ? '' : `<span class="chip ${diffClass}">${diffPct >= 0 ? '+' : ''}${diffPct}% vs Target</span>`;
-    const diffLYStr= diffLYPct=== null ? '' : `<span class="chip ${diffLYClass}">${diffLYPct >= 0 ? '+' : ''}${diffLYPct}% vs LY</span>`;
+  if (items.length === 0) {
+    list.innerHTML = '<div class="empty-state"><span class="emoji">🔍</span>Nessun incasso nel periodo selezionato.</div>';
+    return;
+  }
 
-    const noteStr  = item.notes ? `<p class="history-note">📝 ${escHtml(item.notes)}</p>` : '';
+  items.forEach(item => {
+    const dp  = item.diffPct   !== '' && item.diffPct   != null ? Number(item.diffPct)   : null;
+    const dlp = item.diffLYPct !== '' && item.diffLYPct != null ? Number(item.diffLYPct) : null;
+
+    const chipT  = dp  === null ? '' : `<span class="chip ${dp  >= 0 ? 'diff-pos':'diff-neg'}">${dp  >= 0 ? '+':''}${dp}% vs Target</span>`;
+    const chipLY = dlp === null ? '' : `<span class="chip ${dlp >= 0 ? 'diff-pos':'diff-neg'}">${dlp >= 0 ? '+':''}${dlp}% vs LY</span>`;
+    const note   = item.notes ? `<p class="history-note">📝 ${escHtml(item.notes)}</p>` : '';
 
     const card = document.createElement('div');
     card.className = 'history-card';
@@ -709,61 +676,45 @@ async function loadHistory() {
         <span class="chip">💵 ${fmt(item.cash)}</span>
         <span class="chip">💳 ${fmt(item.card)}</span>
         <span class="chip">🛵 ${fmt(item.justeat)}</span>
-        ${diffStr}${diffLYStr}
+        ${chipT}${chipLY}
       </div>
-      ${noteStr}
-    `;
+      ${note}`;
     list.appendChild(card);
   });
 }
 
-// ── API HELPERS ──
+// ── API ──
 async function apiGet(params) {
-  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) {
-    console.warn('URL Apps Script non configurato!'); return null;
-  }
-  const qs  = new URLSearchParams(params).toString();
-  const url = `${SCRIPT_URL}?${qs}`;
+  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) return null;
   try {
-    const res = await fetch(url);
-    return await res.json();
-  } catch (err) {
-    console.error('GET error', err); return null;
-  }
+    const r = await fetch(`${SCRIPT_URL}?${new URLSearchParams(params)}`);
+    return await r.json();
+  } catch { return null; }
 }
 
 async function apiPost(params) {
-  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) {
-    console.warn('URL Apps Script non configurato!'); return null;
-  }
+  if (!SCRIPT_URL || SCRIPT_URL.includes('INCOLLA')) return null;
   try {
-    const res = await fetch(SCRIPT_URL, {
+    const r = await fetch(SCRIPT_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       body: new URLSearchParams(params).toString()
     });
-    return await res.json();
-  } catch (err) {
-    console.error('POST error', err); return null;
-  }
+    return await r.json();
+  } catch { return null; }
 }
 
 // ── UTILS ──
-function fmt(n) {
-  return Number(n || 0).toLocaleString('it-IT', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function escHtml(str) {
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function fmt(n) { return Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 let toastTimer;
-function showToast(msg, isError = false) {
+function showToast(msg, isError=false) {
   const t = document.getElementById('toast');
   t.textContent = msg;
-  t.className   = 'toast' + (isError ? ' error' : '') + ' show';
+  t.className = 'toast' + (isError ? ' error' : '') + ' show';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.classList.remove('show'); }, 2800);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
 }
 </script>
 </body>
