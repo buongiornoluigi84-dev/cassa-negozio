@@ -320,7 +320,7 @@
             <span class="input-name">Contanti</span>
             <input type="number" inputmode="decimal" class="input-field" id="inp-cash" placeholder="0.00" oninput="updateTotal()"/>
           </div>
-          <span class="input-suffix">€</span>
+          <span class="input-suffix">£</span>
         </div>
         <div class="input-row">
           <span class="input-icon">💳</span>
@@ -328,7 +328,7 @@
             <span class="input-name">Carte</span>
             <input type="number" inputmode="decimal" class="input-field" id="inp-card" placeholder="0.00" oninput="updateTotal()"/>
           </div>
-          <span class="input-suffix">€</span>
+          <span class="input-suffix">£</span>
         </div>
         <div class="input-row">
           <span class="input-icon">🛵</span>
@@ -336,13 +336,13 @@
             <span class="input-name">JustEat</span>
             <input type="number" inputmode="decimal" class="input-field" id="inp-justeat" placeholder="0.00" oninput="updateTotal()"/>
           </div>
-          <span class="input-suffix">€</span>
+          <span class="input-suffix">£</span>
         </div>
       </div>
 
       <div class="total-preview">
         <span class="total-label">Totale giornata</span>
-        <span class="total-value" id="lbl-total">€ 0,00</span>
+        <span class="total-value" id="lbl-total">£ 0,00</span>
       </div>
 
       <p class="section-label">Note</p>
@@ -383,7 +383,7 @@
 <script>
 // ── CONFIGURAZIONE ──
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
-const PIN        = '0002';
+const PIN        = '0003';
 
 // ── BLOCCA PULL-TO-REFRESH ──
 document.querySelector('.tab-panels').addEventListener('touchstart', function(e) {
@@ -494,8 +494,8 @@ async function onDateChange() {
   dbForecast = data.forecast || 0;
   dbLastYear = data.lastyear || 0;
 
-  document.getElementById('lbl-forecast').textContent = dbForecast ? '€ ' + fmt(dbForecast) : '—';
-  document.getElementById('lbl-lastyear').textContent = dbLastYear ? '€ ' + fmt(dbLastYear) : '—';
+  document.getElementById('lbl-forecast').textContent = dbForecast ? '£ ' + fmt(dbForecast) : '—';
+  document.getElementById('lbl-lastyear').textContent = dbLastYear ? '£ ' + fmt(dbLastYear) : '—';
 
   if (data.existing) {
     document.getElementById('inp-cash').value    = data.existing.cash    || '';
@@ -522,7 +522,7 @@ function updateTotal() {
   const c = parseFloat(document.getElementById('inp-cash').value)    || 0;
   const k = parseFloat(document.getElementById('inp-card').value)    || 0;
   const j = parseFloat(document.getElementById('inp-justeat').value) || 0;
-  document.getElementById('lbl-total').textContent = '€ ' + fmt(c + k + j);
+  document.getElementById('lbl-total').textContent = '£ ' + fmt(c + k + j);
 }
 
 // ── SALVA ──
@@ -600,27 +600,27 @@ async function loadTotals() {
     <div class="totals-box">
       <div class="totals-row">
         <span class="totals-lbl">💵 Contanti</span>
-        <span class="totals-val">€ ${fmt(data.cash)}</span>
+        <span class="totals-val">£ ${fmt(data.cash)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">💳 Carte</span>
-        <span class="totals-val">€ ${fmt(data.card)}</span>
+        <span class="totals-val">£ ${fmt(data.card)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">🛵 JustEat</span>
-        <span class="totals-val">€ ${fmt(data.justeat)}</span>
+        <span class="totals-val">£ ${fmt(data.justeat)}</span>
       </div>
       <div class="totals-row highlight">
         <span class="totals-lbl" style="color:var(--accent);font-weight:700">💰 Totale Sales</span>
-        <span class="totals-val accent">€ ${fmt(data.sales)}</span>
+        <span class="totals-val accent">£ ${fmt(data.sales)}</span>
       </div>
       <div class="totals-row divider">
         <span class="totals-lbl">🎯 Forecast</span>
-        <span class="totals-val gold">€ ${fmt(data.forecast)}</span>
+        <span class="totals-val gold">£ ${fmt(data.forecast)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">Diff vs Forecast</span>
-        <span class="totals-val ${diffFClass}">€ ${fmtSigned(data.diffForecast)}</span>
+        <span class="totals-val ${diffFClass}">£ ${fmtSigned(data.diffForecast)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">% vs Forecast</span>
@@ -628,11 +628,11 @@ async function loadTotals() {
       </div>
       <div class="totals-row divider">
         <span class="totals-lbl">📅 Last Year</span>
-        <span class="totals-val gold">€ ${fmt(data.lastyear)}</span>
+        <span class="totals-val gold">£ ${fmt(data.lastyear)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">Diff vs Last Year</span>
-        <span class="totals-val ${diffLClass}">€ ${fmtSigned(data.diffLY)}</span>
+        <span class="totals-val ${diffLClass}">£ ${fmtSigned(data.diffLY)}</span>
       </div>
       <div class="totals-row">
         <span class="totals-lbl">% vs Last Year</span>
