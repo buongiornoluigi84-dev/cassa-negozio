@@ -118,6 +118,7 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
+      min-height: 0;
     }
 
     .tab-content { display: none; padding: 20px 20px 60px; }
@@ -382,11 +383,15 @@
 <script>
 // ── CONFIGURAZIONE ──
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
-const PIN        = '5918';
+const PIN        = '0001';
 
 // ── BLOCCA PULL-TO-REFRESH ──
+document.querySelector('.tab-panels').addEventListener('touchstart', function(e) {
+  this._startY = e.touches[0].clientY;
+}, { passive: true });
 document.querySelector('.tab-panels').addEventListener('touchmove', function(e) {
-  if (this.scrollTop === 0) e.preventDefault();
+  const dy = e.touches[0].clientY - this._startY;
+  if (this.scrollTop === 0 && dy > 0) e.preventDefault();
 }, { passive: false });
 
 // ── PIN ──
