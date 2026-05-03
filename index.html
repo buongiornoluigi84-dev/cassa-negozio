@@ -41,8 +41,14 @@
 
     #app-scroll {
       position: absolute; inset: 0;
-      overflow-y: auto; -webkit-overflow-scrolling: touch;
+      overflow-y: scroll; -webkit-overflow-scrolling: touch;
       overscroll-behavior-y: contain;
+      height: 100%;
+    }
+
+    #app {
+      min-height: 100%;
+      padding-bottom: 60px;
     }
 
     /* ── PIN ── */
