@@ -383,7 +383,7 @@
 <script>
 // ── CONFIGURAZIONE ──
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
-const PIN        = '0001';
+const PIN        = '0002';
 
 // ── BLOCCA PULL-TO-REFRESH ──
 document.querySelector('.tab-panels').addEventListener('touchstart', function(e) {
@@ -534,7 +534,7 @@ async function saveEntry() {
   const notes   = document.getElementById('inp-notes').value.trim();
 
   if (!date) { showToast('Seleziona una data', true); return; }
-  if (cash === 0 && card === 0 && justeat === 0) { showToast('Inserisci almeno un incasso', true); return; }
+  if (cash === 0 && card === 0 && justeat === 0 && !notes) { showToast('Inserisci un incasso o una nota', true); return; }
 
   const btn = document.getElementById('btn-save');
   btn.disabled = true; btn.textContent = 'Salvataggio...';
