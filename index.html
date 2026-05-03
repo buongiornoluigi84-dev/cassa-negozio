@@ -12,7 +12,6 @@
   <link rel="manifest" href="manifest.json"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-
   <style>
     :root {
       --bg:      #0d0d0d;
@@ -30,25 +29,18 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { overscroll-behavior: none; height: 100%; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      overscroll-behavior: none;
+    }
 
     body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Syne', sans-serif;
-      height: 100%; overflow: hidden;
-      position: fixed; width: 100%;
-    }
-
-    #app-scroll {
-      position: absolute; inset: 0;
-      overflow-y: scroll; -webkit-overflow-scrolling: touch;
-      overscroll-behavior-y: contain;
-      height: 100%;
-    }
-
-    #app {
-      min-height: 100%;
-      padding-bottom: 60px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
 
     /* ── PIN ── */
@@ -69,7 +61,7 @@
       border: 2px solid var(--border); background: transparent; transition: all 0.2s;
     }
     .pin-dot.filled { background: var(--accent); border-color: var(--accent); transform: scale(1.15); }
-    .pin-dot.error  { background: var(--red);    border-color: var(--red);    animation: shake 0.4s ease; }
+    .pin-dot.error  { background: var(--red); border-color: var(--red); animation: shake 0.4s ease; }
 
     @keyframes shake {
       0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px)}
@@ -85,17 +77,17 @@
       -webkit-tap-highlight-color: transparent; user-select: none;
     }
     .pin-btn:active { background: var(--border); transform: scale(0.95); }
-    .pin-btn.del    { font-size: 16px; color: var(--muted); font-family: 'Syne', sans-serif; font-weight: 600; }
-
+    .pin-btn.del { font-size: 16px; color: var(--muted); font-family: 'Syne', sans-serif; font-weight: 600; }
     .pin-error { font-size: 13px; color: var(--red); font-weight: 600; letter-spacing: 0.05em; min-height: 18px; }
 
-    /* ── APP ── */
-    #app { display: none; flex-direction: column; min-height: 100%; }
+    /* ── APP SHELL ── */
+    #app { display: none; flex-direction: column; height: 100%; }
     #app.visible { display: flex; }
 
     .app-header {
+      flex-shrink: 0;
       padding: 20px 20px 12px; display: flex; align-items: center; justify-content: space-between;
-      border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 10;
+      border-bottom: 1px solid var(--border); background: var(--bg); z-index: 10;
     }
     .app-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
     .app-name  { font-size: 18px; font-weight: 800; color: var(--text); }
@@ -106,7 +98,10 @@
       cursor: pointer; -webkit-tap-highlight-color: transparent;
     }
 
-    .nav-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); position: sticky; top: 61px; z-index: 9; }
+    .nav-tabs {
+      flex-shrink: 0;
+      display: flex; border-bottom: 1px solid var(--border); background: var(--bg);
+    }
 
     .nav-tab {
       flex: 1; padding: 14px 8px; text-align: center;
@@ -117,7 +112,15 @@
     }
     .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
 
-    .tab-content { display: none; padding: 20px; flex: 1; padding-bottom: 40px; }
+    /* ── SCROLLABLE CONTENT ── */
+    .tab-panels {
+      flex: 1;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
+    }
+
+    .tab-content { display: none; padding: 20px 20px 60px; }
     .tab-content.active { display: block; }
 
     /* ── INSERISCI ── */
@@ -170,7 +173,7 @@
       width: 100%; padding: 18px; background: var(--accent); border: none; border-radius: var(--radius);
       color: #0d0d0d; font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800;
       letter-spacing: 0.05em; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent; margin-bottom: 32px;
+      -webkit-tap-highlight-color: transparent;
     }
     .btn-save:active  { transform: scale(0.98); opacity: 0.9; }
     .btn-save:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -194,10 +197,9 @@
     .btn-search:active { opacity: 0.85; transform: scale(0.98); }
     .btn-search:disabled { opacity: 0.4; }
 
-    /* TOTALS TABLE */
     .totals-box {
       background: var(--card); border: 1px solid var(--border);
-      border-radius: var(--radius); overflow: hidden; margin-bottom: 32px;
+      border-radius: var(--radius); overflow: hidden; margin-bottom: 20px;
     }
 
     .totals-row {
@@ -215,14 +217,11 @@
     .totals-val.pos    { color: var(--green); }
     .totals-val.neg    { color: var(--red); }
 
-    .totals-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
-
-    .notes-section { margin-top: 16px; }
+    .notes-section { margin-top: 4px; }
     .notes-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-    .note-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .note-date { font-family: "DM Mono", monospace; font-size: 12px; font-weight: 500; color: var(--accent); }
+    .note-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; }
+    .note-date { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; color: var(--accent); display: block; margin-bottom: 4px; }
     .note-text { font-size: 14px; color: var(--text); }
-    .totals-empty .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
 
     /* SPINNER */
     .spinner {
@@ -233,7 +232,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .loading-row { display: flex; justify-content: center; padding: 40px; }
 
-    /* DB loading */
     .db-loading { font-family: 'DM Mono', monospace; font-size: 16px; color: var(--muted); animation: pulse 1s ease infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
@@ -276,7 +274,6 @@
 </div>
 
 <!-- APP -->
-<div id="app-scroll">
 <div id="app">
 
   <header class="app-header">
@@ -292,97 +289,103 @@
     <div class="nav-tab"        onclick="switchTab('totali')">Totali</div>
   </nav>
 
-  <!-- TAB INSERISCI -->
-  <div class="tab-content active" id="tab-inserisci">
+  <!-- SCROLLABLE AREA -->
+  <div class="tab-panels">
 
-    <div class="date-row">
-      <span class="date-label">📅 Data</span>
-      <input type="date" class="date-input" id="entry-date" onchange="onDateChange()"/>
-    </div>
+    <!-- TAB INSERISCI -->
+    <div class="tab-content active" id="tab-inserisci">
 
-    <div class="db-info">
-      <div class="db-card">
-        <p class="db-card-label">🎯 Forecast</p>
-        <p class="db-card-value" id="lbl-forecast">—</p>
+      <div class="date-row">
+        <span class="date-label">📅 Data</span>
+        <input type="date" class="date-input" id="entry-date" onchange="onDateChange()"/>
       </div>
-      <div class="db-card">
-        <p class="db-card-label">📅 Anno prec.</p>
-        <p class="db-card-value" id="lbl-lastyear">—</p>
-      </div>
-    </div>
 
-    <p class="section-label">Incassi</p>
-    <div class="input-group">
-      <div class="input-row">
-        <span class="input-icon">💵</span>
-        <div class="input-wrap">
-          <span class="input-name">Contanti</span>
-          <input type="number" inputmode="decimal" class="input-field" id="inp-cash" placeholder="0.00" oninput="updateTotal()"/>
+      <div class="db-info">
+        <div class="db-card">
+          <p class="db-card-label">🎯 Forecast</p>
+          <p class="db-card-value" id="lbl-forecast">—</p>
         </div>
-        <span class="input-suffix">€</span>
-      </div>
-      <div class="input-row">
-        <span class="input-icon">💳</span>
-        <div class="input-wrap">
-          <span class="input-name">Carte</span>
-          <input type="number" inputmode="decimal" class="input-field" id="inp-card" placeholder="0.00" oninput="updateTotal()"/>
+        <div class="db-card">
+          <p class="db-card-label">📅 Anno prec.</p>
+          <p class="db-card-value" id="lbl-lastyear">—</p>
         </div>
-        <span class="input-suffix">€</span>
       </div>
-      <div class="input-row">
-        <span class="input-icon">🛵</span>
-        <div class="input-wrap">
-          <span class="input-name">JustEat</span>
-          <input type="number" inputmode="decimal" class="input-field" id="inp-justeat" placeholder="0.00" oninput="updateTotal()"/>
+
+      <p class="section-label">Incassi</p>
+      <div class="input-group">
+        <div class="input-row">
+          <span class="input-icon">💵</span>
+          <div class="input-wrap">
+            <span class="input-name">Contanti</span>
+            <input type="number" inputmode="decimal" class="input-field" id="inp-cash" placeholder="0.00" oninput="updateTotal()"/>
+          </div>
+          <span class="input-suffix">€</span>
         </div>
-        <span class="input-suffix">€</span>
+        <div class="input-row">
+          <span class="input-icon">💳</span>
+          <div class="input-wrap">
+            <span class="input-name">Carte</span>
+            <input type="number" inputmode="decimal" class="input-field" id="inp-card" placeholder="0.00" oninput="updateTotal()"/>
+          </div>
+          <span class="input-suffix">€</span>
+        </div>
+        <div class="input-row">
+          <span class="input-icon">🛵</span>
+          <div class="input-wrap">
+            <span class="input-name">JustEat</span>
+            <input type="number" inputmode="decimal" class="input-field" id="inp-justeat" placeholder="0.00" oninput="updateTotal()"/>
+          </div>
+          <span class="input-suffix">€</span>
+        </div>
       </div>
+
+      <div class="total-preview">
+        <span class="total-label">Totale giornata</span>
+        <span class="total-value" id="lbl-total">€ 0,00</span>
+      </div>
+
+      <p class="section-label">Note</p>
+      <textarea class="notes-field" id="inp-notes" placeholder="Es: chiuso x dottore, neve, aperto 2 ore in più..."></textarea>
+
+      <button class="btn-save" id="btn-save" onclick="saveEntry()">SALVA INCASSO</button>
+
     </div>
 
-    <div class="total-preview">
-      <span class="total-label">Totale giornata</span>
-      <span class="total-value" id="lbl-total">€ 0,00</span>
+    <!-- TAB TOTALI -->
+    <div class="tab-content" id="tab-totali">
+
+      <div class="filter-row">
+        <div class="filter-card">
+          <span class="filter-label">📅 Dal</span>
+          <input type="date" class="filter-input" id="filter-from"/>
+        </div>
+        <div class="filter-card">
+          <span class="filter-label">📅 Al</span>
+          <input type="date" class="filter-input" id="filter-to"/>
+        </div>
+      </div>
+      <button class="btn-search" id="btn-search" onclick="loadTotals()">CALCOLA TOTALI</button>
+
+      <div class="loading-row" id="totals-loading" style="display:none">
+        <div class="spinner"></div>
+      </div>
+      <div id="totals-result"></div>
+
     </div>
 
-    <p class="section-label">Note</p>
-    <textarea class="notes-field" id="inp-notes" placeholder="Es: chiuso x dottore, neve, aperto 2 ore in più..."></textarea>
+  </div><!-- /tab-panels -->
 
-    <button class="btn-save" id="btn-save" onclick="saveEntry()">SALVA INCASSO</button>
-
-  </div>
-
-  <!-- TAB TOTALI -->
-  <div class="tab-content" id="tab-totali">
-
-    <div class="filter-row">
-      <div class="filter-card">
-        <span class="filter-label">📅 Dal</span>
-        <input type="date" class="filter-input" id="filter-from"/>
-      </div>
-      <div class="filter-card">
-        <span class="filter-label">📅 Al</span>
-        <input type="date" class="filter-input" id="filter-to"/>
-      </div>
-    </div>
-    <button class="btn-search" id="btn-search" onclick="loadTotals()">CALCOLA TOTALI</button>
-
-    <div class="loading-row" id="totals-loading" style="display:none"><div class="spinner"></div></div>
-    <div id="totals-box"></div>
-
-  </div>
-
-</div>
-</div>
+</div><!-- /app -->
 
 <div class="toast" id="toast"></div>
 
 <script>
 // ── CONFIGURAZIONE ──
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
-const PIN        = '1234';
+const PIN        = '5918';
 
 // ── BLOCCA PULL-TO-REFRESH ──
-document.getElementById('app-scroll').addEventListener('touchmove', function(e) {
+document.querySelector('.tab-panels').addEventListener('touchmove', function(e) {
   if (this.scrollTop === 0) e.preventDefault();
 }, { passive: false });
 
@@ -437,7 +440,6 @@ function lockApp() {
 
 // ── INIT ──
 let dbForecast = 0, dbLastYear = 0;
-let dbCache = {};
 
 function initApp() {
   setTodayDate();
@@ -467,7 +469,7 @@ function getFormattedDate(id) {
   return `${d}/${m}/${y}`;
 }
 
-// ── CAMBIO DATA — UNA sola chiamata ──
+// ── CAMBIO DATA ──
 async function onDateChange() {
   const date = getFormattedDate('entry-date');
   if (!date) return;
@@ -549,7 +551,7 @@ function switchTab(tab) {
   document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', ['inserisci','totali'][i] === tab));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
-  document.getElementById('app-scroll').scrollTop = 0;
+  document.querySelector('.tab-panels').scrollTop = 0;
 }
 
 // ── TOTALI ──
@@ -563,7 +565,7 @@ async function loadTotals() {
   btn.disabled = true; btn.textContent = 'Calcolo...';
 
   document.getElementById('totals-loading').style.display = 'flex';
-  document.getElementById('totals-box').innerHTML = '';
+  document.getElementById('totals-result').innerHTML = '';
 
   const data = await apiGet({ action: 'getTotals', startDate, endDate });
 
@@ -574,13 +576,22 @@ async function loadTotals() {
 
   const diffFClass = data.diffForecast    >= 0 ? 'pos' : 'neg';
   const diffLClass = data.diffLY          >= 0 ? 'pos' : 'neg';
-  const pctFClass  = data.diffForecastPct >= 0 ? 'pos' : 'neg';
-  const pctLClass  = data.diffLYPct       >= 0 ? 'pos' : 'neg';
-
+  const pctFClass  = data.diffForecastPct !== null && data.diffForecastPct >= 0 ? 'pos' : 'neg';
+  const pctLClass  = data.diffLYPct       !== null && data.diffLYPct       >= 0 ? 'pos' : 'neg';
   const pctF = data.diffForecastPct !== null ? (data.diffForecastPct >= 0 ? '+' : '') + data.diffForecastPct + '%' : '—';
   const pctL = data.diffLYPct       !== null ? (data.diffLYPct       >= 0 ? '+' : '') + data.diffLYPct       + '%' : '—';
 
-  document.getElementById('totals-box').innerHTML = `
+  const notesHtml = data.notes && data.notes.length > 0 ? `
+    <div class="notes-section">
+      <p class="notes-section-title">📝 Note del periodo</p>
+      ${data.notes.map(n => `
+        <div class="note-item">
+          <span class="note-date">${n.date}</span>
+          <span class="note-text">${escHtml(n.note)}</span>
+        </div>`).join('')}
+    </div>` : '';
+
+  document.getElementById('totals-result').innerHTML = `
     <div class="totals-box">
       <div class="totals-row">
         <span class="totals-lbl">💵 Contanti</span>
@@ -623,16 +634,7 @@ async function loadTotals() {
         <span class="totals-val ${pctLClass}">${pctL}</span>
       </div>
     </div>
-    ${data.notes && data.notes.length > 0 ? `
-    <div class="notes-section">
-      <p class="notes-section-title">📝 Note del periodo</p>
-      ${data.notes.map(n => `
-        <div class="note-item">
-          <span class="note-date">${n.date}</span>
-          <span class="note-text">${escHtml(n.note)}</span>
-        </div>`).join('')}
-    </div>` : ''}
-    `;
+    ${notesHtml}`;
 }
 
 // ── API ──
@@ -659,7 +661,7 @@ async function apiPost(params) {
 // ── UTILS ──
 function fmt(n) { return Number(n||0).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtSigned(n) { return (n >= 0 ? '+' : '') + fmt(n); }
-function escHtml(s)   { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 let toastTimer;
 function showToast(msg, isError=false) {
