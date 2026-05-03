@@ -210,6 +210,12 @@
     .totals-val.neg    { color: var(--red); }
 
     .totals-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 14px; }
+
+    .notes-section { margin-top: 16px; }
+    .notes-section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .note-item { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .note-date { font-family: "DM Mono", monospace; font-size: 12px; font-weight: 500; color: var(--accent); }
+    .note-text { font-size: 14px; color: var(--text); }
     .totals-empty .emoji { font-size: 40px; display: block; margin-bottom: 12px; }
 
     /* SPINNER */
@@ -366,7 +372,7 @@
 
 <script>
 // ── CONFIGURAZIONE ──
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzvRwi_64C7lFjAJs21HuSddwBqEw6H0k4VVm6gqFL1AjBD8p_heOKxxVXGJR181n5Iwg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
 const PIN        = '1234';
 
 // ── BLOCCA PULL-TO-REFRESH ──
@@ -610,7 +616,17 @@ async function loadTotals() {
         <span class="totals-lbl">% vs Last Year</span>
         <span class="totals-val ${pctLClass}">${pctL}</span>
       </div>
-    </div>`;
+    </div>
+    ${data.notes && data.notes.length > 0 ? `
+    <div class="notes-section">
+      <p class="notes-section-title">📝 Note del periodo</p>
+      ${data.notes.map(n => `
+        <div class="note-item">
+          <span class="note-date">${n.date}</span>
+          <span class="note-text">${escHtml(n.note)}</span>
+        </div>`).join('')}
+    </div>` : ''}
+    `;
 }
 
 // ── API ──
