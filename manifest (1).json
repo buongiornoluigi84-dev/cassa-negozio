@@ -1,0 +1,26 @@
+{
+  "name": "Cassa — Il mio negozio",
+  "short_name": "Cassa",
+  "description": "Gestione incassi giornalieri del negozio",
+  "start_url": "/cassa-negozio/index.html",
+  "scope": "/cassa-negozio/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "orientation": "portrait",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192/0d0d0d/c8f135?text=C",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512/0d0d0d/c8f135?text=C",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
