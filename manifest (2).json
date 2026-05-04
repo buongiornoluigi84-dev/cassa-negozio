@@ -1,0 +1,38 @@
+{
+  "name": "Cassa — Il mio negozio",
+  "short_name": "Cassa",
+  "description": "Gestione incassi giornalieri del negozio",
+  "start_url": "/cassa-negozio/index.html",
+  "scope": "/cassa-negozio/",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#0d0d0d",
+  "orientation": "portrait",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "https://buongiornoluigi84-dev.github.io/cassa-negozio/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://buongiornoluigi84-dev.github.io/cassa-negozio/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "https://buongiornoluigi84-dev.github.io/cassa-negozio/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "https://buongiornoluigi84-dev.github.io/cassa-negozio/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
