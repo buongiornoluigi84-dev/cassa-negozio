@@ -634,25 +634,25 @@ async function loadTotals() {
       ${pctRow('% vs Forecast', data.pctF)}
 
       <div class="totals-row divider">
-        <span class="totals-lbl">📅 Last Year (-1)</span>
+        <span class="totals-lbl">📅 1 Year Ago</span>
         <span class="totals-val gold">£ ${fmt(data.ly1)}</span>
       </div>
-      ${diffRow('Diff vs LY -1', data.diffLY1)}
-      ${pctRow('% vs LY -1', data.pctLY1)}
+      ${diffRow('Diff vs 1Y Ago', data.diffLY1)}
+      ${pctRow('% vs 1Y Ago', data.pctLY1)}
 
       ${data.ly2 ? `<div class="totals-row divider">
-        <span class="totals-lbl">📅 Last Year (-2)</span>
+        <span class="totals-lbl">📅 2 Years Ago</span>
         <span class="totals-val gold">£ ${fmt(data.ly2)}</span>
       </div>
-      ${diffRow('Diff vs LY -2', data.diffLY2)}
-      ${pctRow('% vs LY -2', data.pctLY2)}` : ''}
+      ${diffRow('Diff vs 2Y Ago', data.diffLY2)}
+      ${pctRow('% vs 2Y Ago', data.pctLY2)}` : ''}
 
       ${data.ly3 ? `<div class="totals-row divider">
-        <span class="totals-lbl">📅 Last Year (-3)</span>
+        <span class="totals-lbl">📅 3 Years Ago</span>
         <span class="totals-val gold">£ ${fmt(data.ly3)}</span>
       </div>
-      ${diffRow('Diff vs LY -3', data.diffLY3)}
-      ${pctRow('% vs LY -3', data.pctLY3)}` : ''}
+      ${diffRow('Diff vs 3Y Ago', data.diffLY3)}
+      ${pctRow('% vs 3Y Ago', data.pctLY3)}` : ''}
     </div>
     ${notesHtml}`;
 }
