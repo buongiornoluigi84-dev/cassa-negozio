@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
   <meta name="apple-mobile-web-app-title" content="Cassa"/>
   <title>Cassa — Il mio negozio</title>
+  <!-- v2.0 -->
   <link rel="manifest" href="manifest.json"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
@@ -90,6 +91,7 @@
       border-bottom: 1px solid var(--border); background: var(--bg); z-index: 10;
     }
     .app-logo { font-size: 11px; font-weight: 700; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
+    .app-version { font-size: 9px; color: var(--accent); letter-spacing: 0.1em; }
     .app-name  { font-size: 18px; font-weight: 800; color: var(--text); }
 
     .lock-btn {
@@ -279,7 +281,7 @@
 
   <header class="app-header">
     <div>
-      <p class="app-logo">Il mio negozio</p>
+      <p class="app-logo">Il mio negozio &nbsp;<span class="app-version">v2.0</span></p>
       <p class="app-name">Cassa</p>
     </div>
     <button class="lock-btn" onclick="lockApp()">🔒</button>
@@ -382,7 +384,7 @@
 
 <script>
 // ── CONFIGURAZIONE ──
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx0GwYkQdeTyhAatyML3jpoDqQRDMwA6oxQwhNKcGXmbozeecIZOzxzdNU018R3cjlJZw/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8wCOQM6hRujolfODNXgkzO2yJTdDQ3upYYjbW2GkUoBOprpx6ni1OlK8WlhdHS9hBIw/exec';
 const PIN        = '5918';
 
 // ── BLOCCA PULL-TO-REFRESH ──
@@ -462,8 +464,7 @@ function setTodayDate() {
 
 function setDefaultFilterDates() {
   const today = new Date();
-  const from  = new Date(today.getFullYear(), today.getMonth(), 1);
-  document.getElementById('filter-from').value = toInputDate(from);
+  document.getElementById('filter-from').value = toInputDate(today);
   document.getElementById('filter-to').value   = toInputDate(today);
 }
 
@@ -579,12 +580,22 @@ async function loadTotals() {
 
   if (!data) { showToast('Errore di connessione', true); return; }
 
-  const diffFClass = data.diffForecast    >= 0 ? 'pos' : 'neg';
-  const diffLClass = data.diffLY          >= 0 ? 'pos' : 'neg';
-  const pctFClass  = data.diffForecastPct !== null && data.diffForecastPct >= 0 ? 'pos' : 'neg';
-  const pctLClass  = data.diffLYPct       !== null && data.diffLYPct       >= 0 ? 'pos' : 'neg';
-  const pctF = data.diffForecastPct !== null ? (data.diffForecastPct >= 0 ? '+' : '') + data.diffForecastPct + '%' : '—';
-  const pctL = data.diffLYPct       !== null ? (data.diffLYPct       >= 0 ? '+' : '') + data.diffLYPct       + '%' : '—';
+  function cls(v)   { return v === null ? '' : (v >= 0 ? 'pos' : 'neg'); }
+  function pctStr(v){ return v === null ? '—' : (v >= 0 ? '+' : '') + v + '%'; }
+  function diffRow(label, val) {
+    return val === null ? '' : `
+      <div class="totals-row">
+        <span class="totals-lbl">${label}</span>
+        <span class="totals-val ${cls(val)}">£ ${fmtSigned(val)}</span>
+      </div>`;
+  }
+  function pctRow(label, val) {
+    return val === null ? '' : `
+      <div class="totals-row">
+        <span class="totals-lbl">${label}</span>
+        <span class="totals-val ${cls(val)}">${pctStr(val)}</span>
+      </div>`;
+  }
 
   const notesHtml = data.notes && data.notes.length > 0 ? `
     <div class="notes-section">
@@ -614,30 +625,34 @@ async function loadTotals() {
         <span class="totals-lbl" style="color:var(--accent);font-weight:700">💰 Totale Sales</span>
         <span class="totals-val accent">£ ${fmt(data.sales)}</span>
       </div>
+
       <div class="totals-row divider">
         <span class="totals-lbl">🎯 Forecast</span>
         <span class="totals-val gold">£ ${fmt(data.forecast)}</span>
       </div>
-      <div class="totals-row">
-        <span class="totals-lbl">Diff vs Forecast</span>
-        <span class="totals-val ${diffFClass}">£ ${fmtSigned(data.diffForecast)}</span>
-      </div>
-      <div class="totals-row">
-        <span class="totals-lbl">% vs Forecast</span>
-        <span class="totals-val ${pctFClass}">${pctF}</span>
-      </div>
+      ${diffRow('Diff vs Forecast', data.diffF)}
+      ${pctRow('% vs Forecast', data.pctF)}
+
       <div class="totals-row divider">
-        <span class="totals-lbl">📅 Last Year</span>
-        <span class="totals-val gold">£ ${fmt(data.lastyear)}</span>
+        <span class="totals-lbl">📅 Last Year (-1)</span>
+        <span class="totals-val gold">£ ${fmt(data.ly1)}</span>
       </div>
-      <div class="totals-row">
-        <span class="totals-lbl">Diff vs Last Year</span>
-        <span class="totals-val ${diffLClass}">£ ${fmtSigned(data.diffLY)}</span>
+      ${diffRow('Diff vs LY -1', data.diffLY1)}
+      ${pctRow('% vs LY -1', data.pctLY1)}
+
+      ${data.ly2 ? `<div class="totals-row divider">
+        <span class="totals-lbl">📅 Last Year (-2)</span>
+        <span class="totals-val gold">£ ${fmt(data.ly2)}</span>
       </div>
-      <div class="totals-row">
-        <span class="totals-lbl">% vs Last Year</span>
-        <span class="totals-val ${pctLClass}">${pctL}</span>
+      ${diffRow('Diff vs LY -2', data.diffLY2)}
+      ${pctRow('% vs LY -2', data.pctLY2)}` : ''}
+
+      ${data.ly3 ? `<div class="totals-row divider">
+        <span class="totals-lbl">📅 Last Year (-3)</span>
+        <span class="totals-val gold">£ ${fmt(data.ly3)}</span>
       </div>
+      ${diffRow('Diff vs LY -3', data.diffLY3)}
+      ${pctRow('% vs LY -3', data.pctLY3)}` : ''}
     </div>
     ${notesHtml}`;
 }
